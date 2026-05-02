@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE VAULT — International Barbershop Lucerne</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Oswald:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black: #080808;
+  --vault: #0d0d0d;
+  --steel: #1a1a1a;
+  --grey: #2a2a2a;
+  --mid: #444;
+  --ash: #888;
+  --light: #ccc;
+  --snow: #f0ede8;
+  --red: #cc1e1e;
+  --red-glow: rgba(204,30,30,0.4);
+  --gold: #c8a84b;
+  --gold-dim: rgba(200,168,75,0.15);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--snow);
+  font-family: 'Courier Prime', monospace;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+#cur { position:fixed; width:10px; height:10px; background:var(--red); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .25s,height .25s; mix-blend-mode:difference; }
+#cur-ring { position:fixed; width:32px; height:32px; border:1px solid var(--red); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform .15s ease-out,width .3s,height .3s; }
+body:hover #cur { opacity:1; }
+
+/* ── SCANLINES ── */
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events:none; z-index:900;
+}
+
+/* ── NOISE ── */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:901; opacity:.5;
+}
+
+/* ══════════════════════════════
+   VAULT DOOR INTRO
+══════════════════════════════ */
+#vault-intro {
+  position:fixed; inset:0; z-index:800;
+  display:flex; align-items:center; justify-content:center;
+  background:#000;
+  transition: opacity 1s ease 0.5s;
+}
+#vault-intro.gone { opacity:0; pointer-events:none; }
+
+.vault-door {
+  width: min(90vw, 540px);
+  aspect-ratio: 1;
+  position: relative;
+  display:flex; align-items:center; justify-content:center;
+}
+
+.vault-ring {
+  position:absolute;
+  border-radius:50%;
+  border: 2px solid var(--mid);
+  animation: vaultSpin linear infinite;
+}
+.vault-ring:nth-child(1) { width:100%; height:100%; border-color:#333; animation-duration:20s; }
+.vault-ring:nth-child(2) { width:82%; height:82%; border-color:#2a2a2a; animation-duration:15s; animation-direction:reverse; }
+.vault-ring:nth-child(3) { width:64%; height:64%; border-color:#222; animation-duration:10s; }
+
+/* Bolts on outer ring */
+.vault-ring:nth-child(1)::before,
+.vault-ring:nth-child(1)::after {
+  content:'';
+  position:absolute;
+  width:14px; height:14px;
+  background:var(--steel);
+  border:2px solid #444;
+  border-radius:50%;
+  top:50%; left:-7px;
+  transform:translateY(-50%);
+  box-shadow: 0 0 8px rgba(200,168,75,0.3);
+}
+.vault-ring:nth-child(1)::after { left:auto; right:-7px; }
+
+@keyframes vaultSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+.vault-center {
+  position:relative; z-index:10;
+  width:46%; aspect-ratio:1;
+  background: radial-gradient(circle at 40% 35%, #2a2520, #0d0d0d);
+  border-radius:50%;
+  border:3px solid var(--gold);
+  box-shadow: 0 0 40px rgba(200,168,75,0.3), inset 0 0 30px rgba(0,0,0,0.8);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:8px;
+  cursor:none;
+  transition: box-shadow 0.4s;
+}
+.vault-center:hover {
+  box-shadow: 0 0 80px rgba(200,168,75,0.6), inset 0 0 30px rgba(0,0,0,0.8);
+}
+.vault-center-label {
+  font-family:'Black Ops One',sans-serif;
+  font-size:clamp(14px,3vw,22px);
+  letter-spacing:4px;
+  color:var(--gold);
+  text-align:center;
+  line-height:1.2;
+}
+.vault-center-sub {
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--ash);
+  text-transform:uppercase;
+  text-align:center;
+}
+.vault-enter-hint {
+  position:absolute;
+  bottom:-60px;
+  font-size:11px;
+  letter-spacing:4px;
+  color:var(--ash);
+  text-transform:uppercase;
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+/* spinning handle */
+.vault-handle {
+  position:absolute;
+  width:22%;
+  height:6px;
+  background:linear-gradient(90deg,#555,#888,#555);
+  border-radius:3px;
+  top:50%; left:50%;
+  transform-origin:left center;
+  transform:translateY(-50%);
+  animation:handleSpin 4s linear infinite;
+}
+@keyframes handleSpin { from{transform:translateY(-50%) rotate(0deg)} to{transform:translateY(-50%) rotate(360deg)} }
+
+/* ══════════════════════════════
+   NAV
+══════════════════════════════ */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 48px;
+  background:linear-gradient(to bottom,rgba(8,8,8,0.98),transparent);
+  border-bottom:1px solid rgba(200,168,75,0.08);
+}
+.nav-logo {
+  font-family:'Black Ops One',sans-serif;
+  font-size:20px; letter-spacing:6px;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(200,168,75,0.5);
+}
+.nav-logo span { color:var(--red); }
+.nav-links { display:flex; gap:40px; list-style:none; }
+.nav-links a {
+  font-size:10px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--ash); text-decoration:none;
+  transition:color .3s;
+  font-family:'Oswald',sans-serif; font-weight:300;
+}
+.nav-links a:hover { color:var(--gold); }
+.nav-cta {
+  font-family:'Oswald',sans-serif; font-weight:600;
+  font-size:11px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--black); background:var(--red);
+  border:none; padding:10px 24px;
+  cursor:none;
+  transition:background .3s, box-shadow .3s;
+}
+.nav-cta:hover { background:#e02222; box-shadow:0 0 20px var(--red-glow); }
+
+/* ══════════════════════════════
+   HERO
+══════════════════════════════ */
+#hero {
+  min-height:100vh;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:0 60px 80px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Red laser lines */
+.laser {
+  position:absolute;
+  background:var(--red);
+  opacity:0.07;
+  pointer-events:none;
+}
+.laser-h { width:100%; height:1px; left:0; }
+.laser-v { width:1px; height:100%; top:0; }
+.l1 { top:20%; }
+.l2 { top:55%; }
+.l3 { top:78%; }
+.l4 { left:15%; }
+.l5 { left:50%; opacity:0.04; }
+.l6 { left:80%; }
+
+/* Animated red dot scanline */
+.scan-line {
+  position:absolute;
+  width:100%; height:2px;
+  background:linear-gradient(90deg, transparent, var(--red), transparent);
+  opacity:0.15;
+  animation: scan 6s linear infinite;
+  pointer-events:none;
+}
+@keyframes scan { 0%{top:-2px} 100%{top:100%} }
+
+.hero-tag {
+  font-size:10px; letter-spacing:6px; text-transform:uppercase;
+  color:var(--red);
+  margin-bottom:20px;
+  display:flex; align-items:center; gap:16px;
+  animation: fadeUp .8s ease .3s both;
+}
+.hero-tag::before { content:''; display:block; width:40px; height:1px; background:var(--red); }
+
+.hero-title {
+  font-family:'Black Ops One',sans-serif;
+  font-size:clamp(60px,10vw,160px);
+  line-height:.85;
+  letter-spacing:2px;
+  animation: fadeUp .8s ease .5s both;
+}
+.hero-title .red { color:var(--red); text-shadow:0 0 40px var(--red-glow); }
+.hero-title .gold { color:var(--gold); }
+.hero-title .outline {
+  -webkit-text-stroke:1px rgba(240,237,232,0.2);
+  color:transparent;
+}
+
+.hero-bottom {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  margin-top:48px;
+  animation: fadeUp .8s ease .7s both;
+}
+.hero-desc {
+  font-size:14px; line-height:1.8; color:var(--ash);
+  max-width:420px; font-style:italic;
+}
+.hero-badge {
+  text-align:right;
+}
+.badge-num {
+  font-family:'Black Ops One',sans-serif;
+  font-size:72px; color:rgba(200,168,75,0.08);
+  line-height:1;
+  display:block;
+}
+.badge-city {
+  font-size:10px; letter-spacing:5px; text-transform:uppercase;
+  color:var(--gold); display:block; margin-top:-16px;
+}
+
+/* classified stamp */
+.stamp {
+  position:absolute;
+  top:140px; right:80px;
+  width:160px; height:160px;
+  border:4px solid var(--red);
+  border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transform:rotate(-18deg);
+  opacity:0.12;
+  pointer-events:none;
+}
+.stamp-text {
+  font-family:'Black Ops One',sans-serif;
+  font-size:18px; letter-spacing:3px;
+  color:var(--red); line-height:1.2; text-align:center;
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* ══════════════════════════════
+   CLASSIFIED TICKER
+══════════════════════════════ */
+.ticker {
+  background:var(--red);
+  padding:12px 0;
+  overflow:hidden;
+  white-space:nowrap;
+  border-top:1px solid #ff3333;
+  border-bottom:1px solid #991111;
+}
+.ticker-inner {
+  display:inline-flex; gap:60px;
+  animation: ticker 20s linear infinite;
+  font-family:'Oswald',sans-serif; font-weight:600;
+  font-size:12px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--black);
+}
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ══════════════════════════════
+   MISSION FILES (SERVICES)
+══════════════════════════════ */
+#services {
+  padding:120px 60px;
+  position:relative;
+}
+.section-header { margin-bottom:80px; }
+.sec-label {
+  font-size:10px; letter-spacing:6px; text-transform:uppercase;
+  color:var(--red); margin-bottom:20px;
+  display:flex; align-items:center; gap:16px;
+}
+.sec-label::before { content:''; width:32px; height:1px; background:var(--red); }
+.sec-title {
+  font-family:'Black Ops One',sans-serif;
+  font-size:clamp(40px,5vw,72px);
+  line-height:.9; letter-spacing:2px;
+}
+.sec-title .dim { color:rgba(240,237,232,0.15); }
+
+.files-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  background:rgba(200,168,75,0.06);
+}
+
+.file-card {
+  background:var(--vault);
+  padding:48px 40px;
+  position:relative;
+  overflow:hidden;
+  cursor:none;
+  transition:background .4s;
+  border:1px solid transparent;
+}
+.file-card:hover { background:#111; border-color:rgba(204,30,30,0.3); }
+
+/* file folder top */
+.file-card::before {
+  content:'TOP SECRET';
+  position:absolute; top:16px; right:20px;
+  font-size:8px; letter-spacing:4px;
+  color:var(--red); opacity:0.5;
+  font-family:'Oswald',sans-serif; font-weight:600;
+}
+
+/* red stamp */
+.file-stamp {
+  position:absolute;
+  top:20px; left:20px;
+  font-family:'Black Ops One',sans-serif;
+  font-size:9px; letter-spacing:2px;
+  color:var(--red); opacity:0.3;
+  border:2px solid var(--red);
+  padding:3px 8px;
+  transform:rotate(-5deg);
+}
+
+.file-num {
+  font-family:'Black Ops One',sans-serif;
+  font-size:60px; line-height:1;
+  color:rgba(200,168,75,0.06);
+  position:absolute; bottom:20px; right:24px;
+}
+
+.file-icon { font-size:32px; margin-bottom:24px; display:block; }
+
+.file-name {
+  font-family:'Oswald',sans-serif; font-weight:600;
+  font-size:26px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--snow); margin-bottom:8px;
+}
+.file-codename {
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--gold); margin-bottom:20px; display:block;
+  font-style:italic;
+}
+.file-desc {
+  font-size:13px; line-height:1.8; color:var(--ash);
+  margin-bottom:32px;
+}
+.file-classified {
+  display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding-top:20px;
+}
+.file-price {
+  font-family:'Black Ops One',sans-serif;
+  font-size:18px; color:var(--gold);
+}
+.file-duration {
+  font-size:10px; letter-spacing:3px; color:var(--ash);
+  text-transform:uppercase;
+}
+
+/* ══════════════════════════════
+   AGENT DOSSIERS (TEAM)
+══════════════════════════════ */
+#team {
+  padding:100px 60px;
+  background:var(--steel);
+  border-top:1px solid rgba(200,168,75,0.08);
+  border-bottom:1px solid rgba(200,168,75,0.08);
+}
+.agents-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:32px;
+  margin-top:80px;
+}
+.agent-card {
+  position:relative;
+  cursor:none;
+}
+.agent-photo {
+  width:100%; aspect-ratio:3/4;
+  background:linear-gradient(135deg,#1a1510,#0d0d0d);
+  border:1px solid rgba(200,168,75,0.12);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+  margin-bottom:24px;
+  transition:border-color .4s;
+}
+.agent-card:hover .agent-photo { border-color:rgba(204,30,30,0.5); }
+
+/* Crosshair overlay */
+.agent-photo::before, .agent-photo::after {
+  content:'';
+  position:absolute;
+  background:rgba(204,30,30,0.15);
+}
+.agent-photo::before { width:100%; height:1px; top:50%; }
+.agent-photo::after  { width:1px; height:100%; left:50%; }
+
+.agent-initial {
+  font-family:'Black Ops One',sans-serif;
+  font-size:80px; color:rgba(200,168,75,0.08); line-height:1;
+  position:relative; z-index:1;
+}
+
+.agent-overlay {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(to top, rgba(8,8,8,0.97), transparent);
+  padding:40px 20px 20px;
+  transform:translateY(100%);
+  transition:transform .4s ease;
+}
+.agent-card:hover .agent-overlay { transform:translateY(0); }
+
+.agent-codename {
+  font-size:9px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--red); display:block; margin-bottom:6px;
+}
+.agent-spec {
+  font-size:12px; color:var(--ash); font-style:italic;
+}
+
+/* Classified bar */
+.agent-clearance {
+  position:absolute; top:16px; right:0;
+  background:var(--red);
+  font-family:'Oswald',sans-serif; font-weight:700;
+  font-size:8px; letter-spacing:3px;
+  color:#fff; padding:4px 12px 4px 8px;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%);
+}
+
+.agent-name {
+  font-family:'Oswald',sans-serif; font-weight:700;
+  font-size:24px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--snow); margin-bottom:4px;
+}
+.agent-rank {
+  font-size:10px; letter-spacing:3px; color:var(--gold);
+  text-transform:uppercase; display:block; margin-bottom:4px;
+}
+.agent-yrs { font-size:12px; color:var(--ash); }
+
+/* ══════════════════════════════
+   MISSION BRIEFING (ABOUT)
+══════════════════════════════ */
+#about {
+  padding:140px 60px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:100px;
+  align-items:center;
+}
+.about-left { position:relative; }
+.about-box {
+  background:var(--vault);
+  border:1px solid rgba(200,168,75,0.12);
+  padding:60px;
+  position:relative;
+}
+.about-box::before {
+  content:'';
+  position:absolute; top:-1px; left:-1px;
+  width:50px; height:50px;
+  border-top:2px solid var(--red);
+  border-left:2px solid var(--red);
+}
+.about-box::after {
+  content:'';
+  position:absolute; bottom:-1px; right:-1px;
+  width:50px; height:50px;
+  border-bottom:2px solid var(--gold);
+  border-right:2px solid var(--gold);
+}
+.about-file-id {
+  font-size:9px; letter-spacing:5px; text-transform:uppercase;
+  color:var(--red); margin-bottom:24px; display:block;
+}
+.about-quote {
+  font-size:20px; font-style:italic; line-height:1.7;
+  color:var(--snow); margin-bottom:32px;
+}
+.about-attr {
+  font-family:'Oswald',sans-serif; font-size:11px;
+  letter-spacing:4px; text-transform:uppercase; color:var(--gold);
+}
+
+.about-right {}
+.about-heading {
+  font-family:'Black Ops One',sans-serif;
+  font-size:clamp(40px,4.5vw,64px);
+  line-height:.9; letter-spacing:1px;
+  margin-bottom:36px;
+}
+.about-text {
+  font-size:15px; line-height:1.85; color:var(--ash);
+  margin-bottom:24px;
+}
+.about-stats {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:24px; margin-top:48px;
+}
+.a-stat {
+  border-left:2px solid var(--red);
+  padding-left:20px;
+}
+.a-stat-num {
+  font-family:'Black Ops One',sans-serif;
+  font-size:40px; color:var(--gold); line-height:1;
+  display:block;
+}
+.a-stat-label {
+  font-size:10px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--ash);
+  display:block; margin-top:4px;
+}
+
+/* ══════════════════════════════
+   MISSION BRIEFING (BOOKING)
+══════════════════════════════ */
+#booking {
+  padding:120px 60px;
+  background:var(--black);
+  position:relative; overflow:hidden;
+}
+#booking::before {
+  content:'MISSION';
+  position:absolute;
+  font-family:'Black Ops One',sans-serif;
+  font-size:280px; color:rgba(204,30,30,0.03);
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.booking-inner {
+  max-width:720px; margin:0 auto;
+  position:relative;
+}
+.booking-header { margin-bottom:60px; }
+.booking-title {
+  font-family:'Black Ops One',sans-serif;
+  font-size:clamp(40px,6vw,80px);
+  line-height:.9; letter-spacing:2px;
+  margin-bottom:16px;
+}
+.booking-sub {
+  font-size:14px; color:var(--ash);
+  font-style:italic; line-height:1.7;
+}
+
+/* Terminal-style form */
+.terminal {
+  background:#0a0a0a;
+  border:1px solid rgba(200,168,75,0.15);
+  padding:40px;
+  position:relative;
+}
+.terminal::before {
+  content:'';
+  position:absolute; top:-1px; left:-1px;
+  width:40px; height:40px;
+  border-top:2px solid var(--red);
+  border-left:2px solid var(--red);
+}
+.terminal-header {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:32px;
+  padding-bottom:20px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.t-dot {
+  width:12px; height:12px; border-radius:50%;
+}
+.t-dot:nth-child(1) { background:#ff5f56; }
+.t-dot:nth-child(2) { background:#ffbd2e; }
+.t-dot:nth-child(3) { background:#27c93f; }
+.t-title {
+  font-family:'Courier Prime',monospace;
+  font-size:11px; letter-spacing:3px; color:var(--ash);
+  margin-left:8px; text-transform:uppercase;
+}
+.terminal-prompt {
+  font-size:11px; letter-spacing:2px; color:var(--red);
+  margin-bottom:8px; display:block;
+}
+.form-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px;
+  margin-bottom:16px;
+}
+.form-grid .full { grid-column:1/-1; }
+.t-input, .t-select {
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  color:var(--snow);
+  font-family:'Courier Prime',monospace;
+  font-size:13px; letter-spacing:1px;
+  padding:14px 18px;
+  width:100%; outline:none;
+  transition:border-color .3s;
+}
+.t-input::placeholder { color:var(--mid); }
+.t-input:focus, .t-select:focus { border-color:var(--red); }
+.t-select { appearance:none; color:var(--ash); cursor:none; }
+.t-select option { background:#111; }
+
+.submit-mission {
+  width:100%; padding:18px;
+  background:var(--red);
+  color:#fff;
+  border:none;
+  font-family:'Black Ops One',sans-serif;
+  font-size:18px; letter-spacing:6px;
+  text-transform:uppercase;
+  cursor:none;
+  margin-top:8px;
+  position:relative; overflow:hidden;
+  transition:background .3s, box-shadow .3s;
+}
+.submit-mission:hover {
+  background:#e02222;
+  box-shadow:0 0 40px var(--red-glow);
+}
+.submit-mission::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+  transform:translateX(-100%);
+  transition:transform .6s;
+}
+.submit-mission:hover::after { transform:translateX(100%); }
+
+/* ══════════════════════════════
+   LOCATION INTEL
+══════════════════════════════ */
+#location {
+  padding:100px 60px;
+  background:var(--steel);
+  display:grid; grid-template-columns:1fr 1fr; gap:80px;
+  align-items:center;
+  border-top:1px solid rgba(200,168,75,0.08);
+}
+.loc-heading {
+  font-family:'Black Ops One',sans-serif;
+  font-size:clamp(36px,4vw,60px);
+  line-height:.9; letter-spacing:2px; margin-bottom:40px;
+}
+.intel-rows { display:flex; flex-direction:column; gap:0; }
+.intel-row {
+  display:flex; align-items:flex-start; gap:20px;
+  padding:20px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.intel-key {
+  font-size:9px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--red); min-width:100px; padding-top:2px;
+  font-family:'Oswald',sans-serif;
+}
+.intel-val {
+  font-size:14px; color:var(--light); line-height:1.6;
+}
+
+/* Map placeholder */
+.map-frame {
+  background:#0d0d0d;
+  border:1px solid rgba(200,168,75,0.12);
+  aspect-ratio:1;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.map-grid-lines {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(200,168,75,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,168,75,0.04) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+.map-crosshair {
+  position:relative; z-index:2;
+  display:flex; flex-direction:column; align-items:center; gap:0;
+}
+.map-crosshair::before, .map-crosshair::after {
+  content:'';
+  position:absolute;
+  background:var(--red);
+  opacity:0.6;
+}
+.map-crosshair::before { width:40px; height:1px; top:50%; }
+.map-crosshair::after  { width:1px; height:40px; left:50%; }
+.map-dot {
+  width:12px; height:12px;
+  background:var(--red);
+  border-radius:50%;
+  box-shadow:0 0 20px var(--red-glow);
+  animation:pulse 2s ease-in-out infinite;
+  position:relative; z-index:3;
+}
+@keyframes pulse {
+  0%,100%{box-shadow:0 0 10px var(--red-glow)}
+  50%{box-shadow:0 0 40px rgba(204,30,30,0.8)}
+}
+.map-label {
+  position:absolute; bottom:20px;
+  font-size:9px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--gold); font-family:'Oswald',sans-serif;
+}
+
+/* ══════════════════════════════
+   FOOTER
+══════════════════════════════ */
+footer {
+  background:#050505;
+  border-top:1px solid rgba(200,168,75,0.1);
+  padding:60px 60px 32px;
+}
+.footer-top {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:48px;
+  padding-bottom:40px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.footer-logo {
+  font-family:'Black Ops One',sans-serif;
+  font-size:28px; letter-spacing:6px; color:var(--gold);
+}
+.footer-logo span { color:var(--red); }
+.footer-tagline {
+  font-size:13px; font-style:italic; color:var(--ash);
+  text-align:center;
+}
+.footer-social { display:flex; gap:12px; }
+.soc-btn {
+  width:38px; height:38px;
+  border:1px solid rgba(200,168,75,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; color:var(--ash); text-decoration:none;
+  transition:all .3s; cursor:none;
+  font-family:'Oswald',sans-serif; font-weight:600;
+}
+.soc-btn:hover { border-color:var(--red); color:var(--red); }
+.footer-bottom {
+  display:flex; align-items:center; justify-content:space-between;
+}
+.footer-copy {
+  font-size:10px; letter-spacing:2px; color:var(--mid);
+  font-family:'Oswald',sans-serif;
+}
+.footer-swiss {
+  font-size:11px; letter-spacing:3px; color:rgba(200,168,75,0.3);
+  font-style:italic;
+}
+
+/* ══════════════════════════════
+   MISSION ACCEPTED TOAST
+══════════════════════════════ */
+.toast {
+  position:fixed; bottom:40px; right:40px;
+  background:var(--vault);
+  border:1px solid var(--red);
+  border-left:4px solid var(--red);
+  padding:20px 28px;
+  z-index:500;
+  transform:translateX(200%);
+  transition:transform .5s ease;
+  max-width:300px;
+  box-shadow:0 0 40px rgba(204,30,30,0.2);
+}
+.toast.show { transform:translateX(0); }
+.toast-title {
+  font-family:'Black Ops One',sans-serif;
+  font-size:14px; letter-spacing:3px; color:var(--red);
+  margin-bottom:6px; display:block;
+}
+.toast-msg { font-size:12px; color:var(--ash); line-height:1.6; }
+
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- VAULT INTRO -->
+<div id="vault-intro">
+  <div class="vault-door" id="vaultDoor">
+    <div class="vault-ring"></div>
+    <div class="vault-ring"></div>
+    <div class="vault-ring"></div>
+    <div class="vault-handle"></div>
+    <div class="vault-center" id="vaultBtn">
+      <div class="vault-center-label">THE<br>VAULT</div>
+      <div class="vault-center-sub">International Barber<br>Lucerne</div>
+    </div>
+    <div class="vault-enter-hint">[ Click to Enter ]</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">THE<span>VAULT</span></div>
+  <ul class="nav-links">
+    <li><a href="#services">Mission Files</a></li>
+    <li><a href="#team">Agents</a></li>
+    <li><a href="#about">Intel</a></li>
+    <li><a href="#location">Location</a></li>
+  </ul>
+  <button class="nav-cta" onclick="scrollToBooking()">Accept Mission</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <!-- laser grid -->
+  <div class="laser laser-h l1"></div>
+  <div class="laser laser-h l2"></div>
+  <div class="laser laser-h l3"></div>
+  <div class="laser laser-v l4"></div>
+  <div class="laser laser-v l5"></div>
+  <div class="laser laser-v l6"></div>
+  <div class="scan-line"></div>
+
+  <!-- classified stamp -->
+  <div class="stamp">
+    <div class="stamp-text">CLASSIFIED<br>LEVEL 5</div>
+  </div>
+
+  <div class="hero-tag">Operative Grooming · Est. Lucerne</div>
+  <h1 class="hero-title">
+    <span class="outline">INTER</span><br>
+    <span class="red">NATIONAL</span><br>
+    <span class="gold">BARBER</span>
+  </h1>
+  <div class="hero-bottom">
+    <p class="hero-desc">
+      Deep beneath the streets of Lucerne lies a grooming operation unlike any other. 
+      Your identity enters. A legend walks out.
+    </p>
+    <div class="hero-badge">
+      <span class="badge-num">LU</span>
+      <span class="badge-city">🇨🇭 Lucerne · Switzerland</span>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>✦ TOP SECRET GROOMING OPERATIONS</span>
+    <span>✦ INTERNATIONAL BARBERSHOP LUCERNE</span>
+    <span>✦ MISSION: LOOK LEGENDARY</span>
+    <span>✦ CLEARANCE LEVEL: ELITE</span>
+    <span>✦ BOOKING NOW OPEN</span>
+    <span>✦ TOP SECRET GROOMING OPERATIONS</span>
+    <span>✦ INTERNATIONAL BARBERSHOP LUCERNE</span>
+    <span>✦ MISSION: LOOK LEGENDARY</span>
+    <span>✦ CLEARANCE LEVEL: ELITE</span>
+    <span>✦ BOOKING NOW OPEN</span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-header">
+    <div class="sec-label">Mission Files — Declassified</div>
+    <h2 class="sec-title">OPERATION <span class="dim">DOSSIER</span></h2>
+  </div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="file-stamp">FILE 01</div>
+      <span class="file-icon">✂️</span>
+      <div class="file-name">The Phantom Cut</div>
+      <span class="file-codename">Codename: Operation Clean Slate</span>
+      <p class="file-desc">Precision haircut engineered for the modern operative. Consultation, wash, cut, and a finish so clean your enemies won't recognize you.</p>
+      <div class="file-classified">
+        <span class="file-price">CHF 45</span>
+        <span class="file-duration">45 min</span>
+      </div>
+      <span class="file-num">01</span>
+    </div>
+
+    <div class="file-card">
+      <div class="file-stamp">FILE 02</div>
+      <span class="file-icon">🪒</span>
+      <div class="file-name">The Razor Protocol</div>
+      <span class="file-codename">Codename: Operation Smooth</span>
+      <p class="file-desc">Traditional straight razor shave with hot steam, artisan lather, and cold-seal finish. Every stroke is a calculated move.</p>
+      <div class="file-classified">
+        <span class="file-price">CHF 55</span>
+        <span class="file-duration">50 min</span>
+      </div>
+      <span class="file-num">02</span>
+    </div>
+
+    <div class="file-card">
+      <div class="file-stamp">FILE 03</div>
+      <span class="file-icon">🎯</span>
+      <div class="file-name">The Full Dossier</div>
+      <span class="file-codename">Codename: Operation Legend</span>
+      <p class="file-desc">Complete grooming extraction. Haircut, hot towel shave, beard sculpt, and scalp treatment. The whole package. For the complete operative.</p>
+      <div class="file-classified">
+        <span class="file-price">CHF 95</span>
+        <span class="file-duration">90 min</span>
+      </div>
+      <span class="file-num">03</span>
+    </div>
+
+    <div class="file-card">
+      <div class="file-stamp">FILE 04</div>
+      <span class="file-icon">🧔</span>
+      <div class="file-name">Beard Intel</div>
+      <span class="file-codename">Codename: Operation Shadow</span>
+      <p class="file-desc">Beard shaping, sculpting and conditioning. We map your jawline and define your edges with military-grade precision.</p>
+      <div class="file-classified">
+        <span class="file-price">CHF 35</span>
+        <span class="file-duration">30 min</span>
+      </div>
+      <span class="file-num">04</span>
+    </div>
+
+    <div class="file-card">
+      <div class="file-stamp">FILE 05</div>
+      <span class="file-icon">👦</span>
+      <div class="file-name">Junior Agent</div>
+      <span class="file-codename">Codename: Operation Next Gen</span>
+      <p class="file-desc">The next generation of operatives. Precision kids haircut in a relaxed environment. Every young agent deserves the best.</p>
+      <div class="file-classified">
+        <span class="file-price">CHF 30</span>
+        <span class="file-duration">30 min</span>
+      </div>
+      <span class="file-num">05</span>
+    </div>
+
+    <div class="file-card">
+      <div class="file-stamp">FILE 06</div>
+      <span class="file-icon">👑</span>
+      <div class="file-name">The Black File</div>
+      <span class="file-codename">Codename: CLASSIFIED</span>
+      <p class="file-desc">Our most exclusive package. Private room. Whisky. Full service from cut to hot-towel shave. Details revealed upon request. For elite operatives only.</p>
+      <div class="file-classified">
+        <span class="file-price">CHF 150+</span>
+        <span class="file-duration">By Request</span>
+      </div>
+      <span class="file-num">06</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="section-header">
+    <div class="sec-label">Personnel Files — Level 5 Clearance</div>
+    <h2 class="sec-title">OUR <span class="dim">AGENTS</span></h2>
+  </div>
+  <div class="agents-grid">
+
+    <div class="agent-card">
+      <div class="agent-photo">
+        <div class="agent-clearance">LEVEL 5</div>
+        <span class="agent-initial">MK</span>
+        <div class="agent-overlay">
+          <span class="agent-codename">Codename: The Surgeon</span>
+          <span class="agent-spec">Precision cuts · Fade specialist · 14 years active</span>
+        </div>
+      </div>
+      <div class="agent-name">Marco K.</div>
+      <span class="agent-rank">Lead Operative · Head Barber</span>
+      <span class="agent-yrs">Training: Milan, Istanbul, Zürich</span>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-photo">
+        <div class="agent-clearance">LEVEL 4</div>
+        <span class="agent-initial">AR</span>
+        <div class="agent-overlay">
+          <span class="agent-codename">Codename: The Architect</span>
+          <span class="agent-spec">Beard sculpting · Straight razor · 10 years active</span>
+        </div>
+      </div>
+      <div class="agent-name">Andre R.</div>
+      <span class="agent-rank">Senior Operative · Beard Specialist</span>
+      <span class="agent-yrs">Training: Lisbon, Geneva, Lucerne</span>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-photo">
+        <div class="agent-clearance">LEVEL 3</div>
+        <span class="agent-initial">JL</span>
+        <div class="agent-overlay">
+          <span class="agent-codename">Codename: The Ghost</span>
+          <span class="agent-spec">Classic cuts · Hot towel ritual · 8 years active</span>
+        </div>
+      </div>
+      <div class="agent-name">James L.</div>
+      <span class="agent-rank">Field Operative · Style Expert</span>
+      <span class="agent-yrs">Training: London, Basel, Lucerne</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-left">
+    <div class="about-box">
+      <span class="about-file-id">INTEL FILE #001 · CONFIDENTIAL</span>
+      <p class="about-quote">
+        "We don't just cut hair. We engineer confidence. 
+        Every man who enters The Vault leaves as someone 
+        the world cannot ignore."
+      </p>
+      <span class="about-attr">— The Vault, Lucerne</span>
+    </div>
+  </div>
+  <div class="about-right">
+    <div class="sec-label">Briefing Document</div>
+    <h2 class="about-heading">THE <span style="color:var(--red)">VAULT</span><br>INTELLIGENCE</h2>
+    <p class="about-text">
+      International Barbershop has been operating in the heart of Lucerne for years, 
+      serving every kind of man — from the business executive to the young operative 
+      just starting out. We speak your language: English, German, Italian, Spanish and more.
+    </p>
+    <p class="about-text">
+      Our mission is simple. Every client leaves looking and feeling like the most 
+      powerful version of himself. No shortcuts. No compromises. Only precision.
+    </p>
+    <div class="about-stats">
+      <div class="a-stat">
+        <span class="a-stat-num">8+</span>
+        <span class="a-stat-label">Languages Spoken</span>
+      </div>
+      <div class="a-stat">
+        <span class="a-stat-num">500+</span>
+        <span class="a-stat-label">Satisfied Operatives</span>
+      </div>
+      <div class="a-stat">
+        <span class="a-stat-num">100%</span>
+        <span class="a-stat-label">Precision Guaranteed</span>
+      </div>
+      <div class="a-stat">
+        <span class="a-stat-num">3</span>
+        <span class="a-stat-label">Master Barbers</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="booking-inner">
+    <div class="booking-header">
+      <div class="sec-label">Secure Channel · Encrypted</div>
+      <h2 class="booking-title">ACCEPT YOUR <span style="color:var(--red)">MISSION</span></h2>
+      <p class="booking-sub">
+        Transmit your details through our secure channel. Confirmation arrives within the hour. 
+        Your mission begins the moment you sit in the chair.
+      </p>
+    </div>
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="t-dot"></div>
+        <div class="t-dot"></div>
+        <div class="t-dot"></div>
+        <span class="t-title">secure_booking_terminal_v2.exe</span>
+      </div>
+      <span class="terminal-prompt">> INITIATE BOOKING SEQUENCE...</span>
+      <div class="form-grid">
+        <input class="t-input" type="text" placeholder="OPERATIVE NAME">
+        <input class="t-input" type="tel" placeholder="CONTACT CHANNEL (+41...)">
+        <input class="t-input full" type="email" placeholder="ENCRYPTED EMAIL">
+        <select class="t-select">
+          <option value="" disabled selected>SELECT MISSION TYPE</option>
+          <option>The Phantom Cut — CHF 45</option>
+          <option>The Razor Protocol — CHF 55</option>
+          <option>The Full Dossier — CHF 95</option>
+          <option>Beard Intel — CHF 35</option>
+          <option>Junior Agent — CHF 30</option>
+          <option>The Black File — CHF 150+</option>
+        </select>
+        <input class="t-input" type="date">
+        <select class="t-select">
+          <option value="" disabled selected>PREFERRED AGENT</option>
+          <option>Marco K. — Lead Operative</option>
+          <option>Andre R. — Senior Operative</option>
+          <option>James L. — Field Operative</option>
+          <option>No Preference</option>
+        </select>
+      </div>
+      <button class="submit-mission" onclick="missionAccepted()">▶ TRANSMIT MISSION REQUEST</button>
+    </div>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section id="location">
+  <div>
+    <div class="sec-label">Location Intelligence</div>
+    <h2 class="loc-heading">FIND THE <span style="color:var(--red)">VAULT</span></h2>
+    <div class="intel-rows">
+      <div class="intel-row">
+        <span class="intel-key">Address</span>
+        <span class="intel-val">Zürichstrasse 46<br>6004 Luzern, Switzerland</span>
+      </div>
+      <div class="intel-row">
+        <span class="intel-key">Phone</span>
+        <span class="intel-val">+41 41 201 16 69</span>
+      </div>
+      <div class="intel-row">
+        <span class="intel-key">Mon – Fri</span>
+        <span class="intel-val">09:00 – 19:00</span>
+      </div>
+      <div class="intel-row">
+        <span class="intel-key">Saturday</span>
+        <span class="intel-val">09:00 – 17:00</span>
+      </div>
+      <div class="intel-row">
+        <span class="intel-key">Sunday</span>
+        <span class="intel-val">Closed · Operatives Rest</span>
+      </div>
+      <div class="intel-row">
+        <span class="intel-key">Languages</span>
+        <span class="intel-val">English · German · Italian · Turkish · Kurdish · Spanish</span>
+      </div>
+    </div>
+  </div>
+  <div class="map-frame">
+    <div class="map-grid-lines"></div>
+    <div class="map-crosshair">
+      <div class="map-dot"></div>
+    </div>
+    <span class="map-label">🇨🇭 LUZERN · OPERATIVE ZONE</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-logo">THE<span>VAULT</span></div>
+    <div class="footer-tagline">"Your identity enters. A legend walks out."</div>
+    <div class="footer-social">
+      <a href="#" class="soc-btn">FB</a>
+      <a href="#" class="soc-btn">IG</a>
+      <a href="#" class="soc-btn">WA</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 International Barbershop Lucerne · All Rights Reserved</span>
+    <span class="footer-swiss">Forged in Lucerne · 🇨🇭 Switzerland</span>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-title">▶ MISSION ACCEPTED</span>
+  <span class="toast-msg">Your booking request has been transmitted. We will confirm within the hour. Prepare for your transformation.</span>
+</div>
+
+<script>
+// Cursor
+const cur = document.getElementById('cur');
+const ring = document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function animCur(){
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+  rx+=(mx-rx)*.13; ry+=(my-ry)*.13;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animCur);
+})();
+document.querySelectorAll('button,a,.file-card,.agent-card,.stat-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';ring.style.width='52px';ring.style.height='52px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';ring.style.width='32px';ring.style.height='32px';});
+});
+
+// Vault intro
+document.getElementById('vaultBtn').addEventListener('click',()=>{
+  // play unlock effect
+  const intro = document.getElementById('vault-intro');
+  const door = document.getElementById('vaultDoor');
+  door.style.transition='transform 1s ease, opacity 1s ease';
+  door.style.transform='scale(1.3) rotate(90deg)';
+  door.style.opacity='0';
+  setTimeout(()=>{ intro.classList.add('gone'); },900);
+});
+
+function scrollToBooking(){
+  document.getElementById('booking').scrollIntoView({behavior:'smooth'});
+}
+
+function missionAccepted(){
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),5000);
+}
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.file-card,.agent-card,.intel-row,.a-stat');
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+    }
+  });
+},{threshold:0.1});
+revealEls.forEach(el=>{
+  el.style.opacity='0';
+  el.style.transform='translateY(24px)';
+  el.style.transition='opacity .6s ease, transform .6s ease';
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
